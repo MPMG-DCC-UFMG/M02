@@ -26,7 +26,7 @@ class MPMGFinder(object):
 		
 		
 	def set_onlybds(self):
-		self.onlybds = [f for f in listdir(self.mypath) if isfile(join(self.mypath, f)) and f != '.tar.gz' and f != '.tmp']
+		self.onlybds = [f for f in listdir(self.mypath) if isfile(join(self.mypath, f)) and not f.endswith('.tar.gz') and not f.endswith('.tmp')]
 		print(len(self.onlybds))
 
 	def set_annoted_atributes(self):
