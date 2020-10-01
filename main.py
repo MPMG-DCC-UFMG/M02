@@ -227,9 +227,10 @@ class MPMGFinder(object):
 
 	def build_model(self):
 
+		t_init = time.time()
 		skf = StratifiedKFold(n_splits=5, random_state=42, shuffle=True)
-		micro_list = []
-		macro_list = []
+		self.micro_in_train = []
+		self.macro_in_train = []
 
 		for train_index, test_index in skf.split(self.X, self.y):
 			print("TRAIN:", train_index, "TEST:", test_index)
@@ -248,16 +249,16 @@ class MPMGFinder(object):
 			X_train, y_train = rus.fit_resample(X_train, y_train)
 			
 			#exit()
-			info = {
+			self.classinfo = {
 				"name_class": "lsvm",
 				"cv": 10,
 				'n_jobs': -1,
 				"max_iter": 1000000,
 			}
-			self.classifier = TraditionalClassifier(info)
+			self.classifier = TraditionalClassifier(self.classinfo)
 			self.classifier.fit(X_train, y_train)
 
-			dump(self.classifier, 'model/classifier.joblib') 
+			
 
 			y_pred = self.classifier.predict(X_test)
 
@@ -267,10 +268,11 @@ class MPMGFinder(object):
 			print("\tMicro: ", micro)
 			print("\tMacro: ", macro)
 			
-			micro_list.append(micro)
-			macro_list.append(macro)
+			self.micro_in_train.append(micro)
+			self.macro_in_train.append(macro)
 			
 			break
+		self.time_to_generate = time.time() - t_init
 
 	def y_predict(self):
 		self.y_test = np.zeros(len(self.atributes_to_consider),dtype=int)
@@ -290,6 +292,7 @@ class MPMGFinder(object):
 		self.nomes_header = []
 		self.enderecos_header = []
 
+		blockPrint()
 		for bd in self.onlybds:
 			df = pd.read_csv(f"{self.mypath}/{bd}")
 			df = DataPreprocessor(df).pre_processing()
@@ -324,6 +327,7 @@ class MPMGFinder(object):
 						self.y_test[idx_total] = self.classe['endereco']
 						self.enderecos_header.append(a)
 
+		enablePrint()
 		self.finded['endereco'] = self.enderecos_header
 		self.finded['nome'] = self.nomes_header
 		print(self.y_test[:20])
@@ -334,6 +338,7 @@ class MPMGFinder(object):
 		print("precision_score", round(precision_score(self.y_true, self.y_test, average="macro")*100,2))
 		print("recall_score", round(recall_score(self.y_true, self.y_test, average="macro")*100,2))
 
+	#TODO: Conferir essa função
 	def resultado_micro_macro_binario(self, c):
 		
 		encontrados = self.finded[c]
@@ -367,7 +372,7 @@ class MPMGFinder(object):
 		self.results[c]['recall'] = tp/(tp+fn)
 		self.results[c]['f1'] = harmonic_mean([tp/(tp+fp),tp/(tp+fn)])
 
-
+	#deprecated
 	def results(self):
 		inv_map = {v: k for k, v in self.classe.items()}
 
@@ -397,32 +402,129 @@ class MPMGFinder(object):
 		self.resultado_micro_macro_binario('titulo')
 
 		print("Saving Json Results")
-		with open("results.json", 'w') as outfile:
+		with open(f"{args.outputdir}/results.json", 'w') as outfile:
 			json.dump(self.results, outfile, indent=4)
 		
+	def save_model(self):
+		print("Saving Model...")
+		dump(self.classifier, f'{self.args.outputdir}/classifier_{self.args.control}.joblib') 
 		
+	def save_train_info(self):
+		print("Saving train info...")
+		self.info_train = {
+			"classifierinfo":self.classinfo,
+			"class_saved_dir": f'{self.args.outputdir}/classifier_{self.args.control}.joblib',
+			"control": self.args.control,
+			"dataused": self.onlybds,
+			"generationtime": self.time_to_generate,
+			"micro_in_train": self.micro_in_train,
+			"macro_in_train": self.macro_in_train,
+			"atributes_to_consider": self.atributes_to_consider,
+			"atributos_nao_considerados": list(self.atributos_nao_considerados),
+			"classes_avaliadas": "",
+			"confusion_matrix_in_train": "",
+
+		}
+		with open(f"{self.args.outputdir}/train_info_{self.args.control}.json", 'w') as outfile:
+			json.dump(info_train, outfile, indent=4)
+
+	def load_train_info(self):
+
+		with open(self.args.treined, 'r') as f: 
+			self.info_train = json.load(f)
+
+		self.classifier = load(self.info_train["class_saved_dir"])
+		
+	def save_all_results(self):
+
+		inv_map = {v: k for k, v in self.classe.items()}
+
+		data = {'y_true': self.y_true,
+			'y_test': self.y_test
+		}
+
+		df = pd.DataFrame(data, columns=['y_true','y_test'])
+		df = df.applymap(lambda x: inv_map[x])
+
+		self.results = {
+			"loadedclassifier": self.args.treined,
+			"control": self.args.control,
+			"dataused": self.onlybds,
+			"atributes_to_consider": self.atributes_to_consider,
+			"atributos_nao_considerados": list(self.atributos_nao_considerados),
+			"classes_avaliadas": "",
+			"confusion_matrix_in_train": "",
+			}
+
+		for x in self.classe.keys():
+			if x != "naoconsiderar":
+				self.results[x] = {}
+
+		self.confusion_matrix = pd.crosstab(df['y_true'], df['y_test'], rownames=['True'], colnames=['Predicted'])
+		#self.results['confusion_matrix'] = self.confusion_matrix.tolist()
+
+		print(self.confusion_matrix)
+		self.resultado_micro_macro_binario('endereco')
+		self.resultado_micro_macro_binario('nome')
+
+		self.resultado_micro_macro_binario('cpf_cnpj')
+		self.resultado_micro_macro_binario('nis')
+		self.resultado_micro_macro_binario('email')
+		self.resultado_micro_macro_binario('cpf_cnpj')
+		self.resultado_micro_macro_binario('titulo')
+
+		self.results['info_train'] = self.info_train
+
+		print("Saving Json Results")
+		with open(f"{self.args.outputdir}/results_{self.args.control}.json", 'w') as outfile:
+			json.dump(self.results, outfile, indent=4)
+
+
+
+
 
 def main():
 	gc.collect()
 	args = arguments()
 
 	finder = MPMGFinder(args)
+	#set_onlybds contem o path dos bancos
+	#TODO colocar entrada como bds no stage do hive do mpmg
 	finder.set_onlybds()
+	#Seta os atributos por classe anotados manualmente
+	#TODO: Conferir a alocacao de cada atributo ao
 	finder.set_annoted_atributes()
+	#Seta os atributos distintos = conjunto de atributos unicos
 	finder.set_distinct_atributes()
+	#Seta atributos a remover pelas regras simples especificadas na doc. Ex: Numeros <5 digitos; flags; etc.
 	finder.set_classes_nao_consideradas()
+	#Seta atributos a serem considerado pela abordagem. Esse é o conjunto complemento do conjunto a não remover setado acima.
 	finder.set_atributes_to_consider()
-	finder.find_validable_class()
-	#finder.validate_to_remove()
+	#Seta o vetor y_true para geramos o modelos e/ou testarmos.
 	finder.set_y_true()
-	finder.set_classifyable_docs()
-	finder.set_X_and_y()
-	finder.build_model()
-	finder.y_predict()
 
-	finder.general_results()
-	finder.results()
+	#Seta os atributos validaveis. Se o usuário quiser. Deixei essa flag caso vejam a necessidade de somente separar endereco e nome.
+	if args.dovalidable:
+		finder.find_validable_class()
 
+	if args.train == 1:
+	
+		finder.set_classifyable_docs()
+		finder.set_X_and_y()
+		finder.build_model()
+		finder.save_model()
+		finder.save_train_info()
+
+	
+	if args.test == 1:
+
+		print("Load train info")
+		if args.train != 1: finder.load_train_info()
+
+		finder.set_classifyable_docs()
+		finder.set_X_and_y()
+		finder.y_predict()
+		finder.save_all_results()
 
 	#analises = Analises(finder)
 	#analises.analise_nans_por_classe()
