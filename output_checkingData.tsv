@@ -1,0 +1,14 @@
+column	manual	predita	num_DB	instances
+num_livro	nenhuma	nenhuma	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	000C22#000C18#0000C3#000001#000002#
+num_termo	nenhuma	nenhuma	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	0000005875#0000004747#0000004748#0000004749#0000004751#
+dta_lavratura	dataTempo	nenhuma	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	20180910#20180904#20180905#20180906#20180908#
+num_benef_inss	nenhuma	nenhuma	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	0953078019#0000000000#0820152609#0960518649#0281740550#
+nome	nome	nome	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	MARIA DA PENHA DE JESUS #FRANCINALDO VARELO ALVES #ELI SOARES DE SOUZA #FELINTRO FERREIRA DE SOUZA #FRANCISCO GALDINO COSTA #
+mae	nome	nome	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	MARIA RITA CRISTINA DA COSTA #NILDA ALVES VARELO #EDITH LUZIA DE ALMEIDA #MARIA PEREIRA DE SOUZA #GERTRUDES MARQUES SOARES #
+dta_nasc	dataTempo	dataTempo	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	19300202#19640306#19800703#19491225#19270202#
+dta_obito	dataTempo	dataTempo	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	20180901#20180903#20180830#20180905#20180902#
+cpf	cpfCnpj	nenhuma	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	52536149668#40065197100#03129184104#09853707187#13348752353#
+nit	nenhuma	nenhuma	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	00000000000#
+id_cartorio	cpfCnpj	cpfCnpj	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	01861559000179#03159889000142#03374812000195#06728059000187#08468886000104#
+metadata_arquivo	metadado	metadado	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	OBI201809.TXT#
+metadata_data_ingestao	metadado	metadado	sisobi_obi_2018_delimitado_98bc5_202002061552.csv	2019-09-30 10:13:52#
