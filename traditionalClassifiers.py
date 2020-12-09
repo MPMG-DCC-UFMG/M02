@@ -1,5 +1,3 @@
-
-
 from sklearn.base import BaseEstimator
 from sklearn.model_selection import GridSearchCV
 from config import *
@@ -93,7 +91,7 @@ class TraditionalClassifier(BaseEstimator):
 
 
 	def predict(self, X, y=None):
-		print('Predicting')   
+		#print('Predicting')   
 		t_init = time.time()     
 		self.y_pred = self.estimator.predict(X)
 		self.test_time = time.time() - t_init
