@@ -137,7 +137,8 @@ def train_data(pathname, threshold, path_out):
 	f_write.write("column\tmanual\tpredita\tnum_DB\tinstances\n")
 	for bd,column_df in dict_bd_column_pred.items():
 		for c in column_df:
-			f_write.write("{}\t{}\t{}\t{}\t{}\n".format(c,"nenhuma" if c not in column_class else column_class[c],dict_bd_column_pred[bd][c],bd,dict_bd_column_examples[bd][c]))
+			f_write.write("{}\t{}\t{}\t{}\t{}\n".format(c, "nenhuma" if c not in column_class else column_class[c],
+														dict_bd_column_pred[bd][c], bd, dict_bd_column_examples[bd][c]))
 	f_write.close()
 
 	print("Classification report:")
