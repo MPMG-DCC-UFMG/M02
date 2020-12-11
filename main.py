@@ -3,6 +3,7 @@ import os
 import argparse
 import classification
 import random
+import json
 
 def main():
 
@@ -61,8 +62,12 @@ def main():
 					filename = max(paths, key=os.path.getctime)
 			threshold = getattr(args, "threshold")
 			result = classification.test_data(db, column, filename, threshold)
-			# TODO: print as JSON
+			
 			print(result)
+			
+			#print as JSON
+			with open(‘result.json’, ‘w’) as json_file:
+    				json.dump(result, json_file, indent=4)
 		else:
 			print("Please, inform the column name.")
 			print("Usage: {} --db <database> -c <column>".format(sys.argv[0]))
