@@ -61,13 +61,9 @@ def main():
 				else:
 					filename = max(paths, key=os.path.getctime)
 			threshold = getattr(args, "threshold")
-			result = classification.test_data(db, column, filename, threshold)
-			
-			print(result)
-			
-			#print as JSON
-			with open(‘result.json’, ‘w’) as json_file:
-    				json.dump(result, json_file, indent=4)
+			pathname = getattr(args, "path")
+			result = classification.test_data(pathname, db, column, filename, threshold)
+			print(json.dumps(result, indent = 4))
 		else:
 			print("Please, inform the column name.")
 			print("Usage: {} --db <database> -c <column>".format(sys.argv[0]))

@@ -28,8 +28,6 @@ def train_data(pathname, threshold, path_out):
 
 	bd = connectBD.Connection()
 
-	bd.getTableDB(pathname)
-
 	# Phase 1: filtering the data
 	print("Phase 1: Filtering the data...")
 	# dict[database][column] = DataFrame
@@ -145,13 +143,13 @@ def train_data(pathname, threshold, path_out):
 	print("Classification report:")
 	print(classification_report(y_true, y_pred))
 
-def test_data(table, column, filename, threshold):
+def test_data(pathname, table, column, filename, threshold):
 	validate = validation.Validation(threshold)
 
 	bd = connectBD.Connection()
 	
 	# dict[database][column] = DataFrame
-	dict_bd_column_df = validate.filterData(bd.getColumnDB(table, column), verbose=False)
+	dict_bd_column_df = validate.filterData(bd.getColumnDB(pathname, table, column), verbose=False)
 
 	dict_bd_column_df_pred = dict()
 	for db in dict_bd_column_df:

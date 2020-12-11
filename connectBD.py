@@ -1,47 +1,14 @@
 from os import path, devnull, listdir
 from os.path import isfile, join
-from pyhive import hive
-from thrift import Thrift
 import pandas as pd
 import numpy as np
 import csv
 
 class Connection(object):
 
-	def __init__(self):
-		print("Class Connection - init")
-		self.query=None
-		self.read_conn=None
-
-
-	def getHiveConnection(self):	
-		print("class Connection - getHiveConnection")
-		self.config_db = {
-			'host':'xx.xx.x.xx',
-            'port':'xxxxx',
-            'username':'xxxxxxxx',
-            'password':'xxxxxxxx',
-            'auth':'xxxxxxxx',
-            'database':'xxxxxxxx'
-        }
-		objHive = hive(**self.config_db)
-		return objHive
-
-
-	def executeQueryDB(self, query):
-		with self.read_conn.cursor() as read_cur:
-			read_cur.execute(query)
-			result_query = read_cur.fetchall()
-		self.read_conn.close()
-		print (result_query)
-
-
-	def getTableDB(self, path_db):
-		print("class Connection - getTableDB - ", path_db)
-		self.read_conn = self.getHiveConnection()
-		self.query = 'SHOW TABLES'
-		self.executeQueryDB(self.query)
-
+	#TODO
+#	def __init__(self):
+#		print("TODO: class Connection - init")
 
 	def readFilesDB(self, path_bd):
 		print("Reading the database files...")
@@ -58,7 +25,7 @@ class Connection(object):
 		return dict_bd_df
 
 	# TODO: get data from the database
-	def getColumnDB(self, table, column):
+	def getColumnDB(self, pathname, table, column):
 		dict_bd_df = dict()
 		try:
 			df = pd.read_csv(f"bds_stage/{table}",dtype=str)
