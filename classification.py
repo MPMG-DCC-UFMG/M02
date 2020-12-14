@@ -41,7 +41,7 @@ def train_data(pathname, threshold, path_out):
 	dict_bd_column_pred = dict() # predicted by pattern
 
 	# TODO: to remove - only for checking the results
-	dict_bd_column_examples = dict() # examples
+	#dict_bd_column_examples = dict() # examples
 
 	# dict[column] = class
 	column_class = select_attributes.getAnnotatedColumns()
@@ -68,7 +68,7 @@ def train_data(pathname, threshold, path_out):
 				dict_bd_column_true[bd][column] = "nenhuma"
 			
 			# TODO: to remove - only for checking the results
-			instances = ""
+			"""instances = ""
 			n_instances = 1
 			c = column
 			if len(df.unique()) > 0:
@@ -79,7 +79,7 @@ def train_data(pathname, threshold, path_out):
 					n_instances = n_instances + 1
 			if bd not in dict_bd_column_examples:
 				dict_bd_column_examples[bd] = dict()
-			dict_bd_column_examples[bd][column] = instances
+			dict_bd_column_examples[bd][column] = instances"""
 
 	# Results of the automatic pattern checking
 	#print(classification_report(y_true, y_pred))
@@ -132,39 +132,41 @@ def train_data(pathname, threshold, path_out):
 			cl = dict_bd_column_true[bd][c]
 			y_true.append(cl if "_" not in cl else cl[:cl.index("_")])
 
+	"""
 	# TODO: to remove - only for checking the results
 	f_write = open("output_checkingData.tsv", "w")
 	f_write.write("column\tmanual\tpredita\tnum_DB\tinstances\n")
 	for bd,column_df in dict_bd_column_pred.items():
 		for c in column_df:
-			f_write.write("{}\t{}\t{}\t{}\t{}\n".format(c, "nenhuma" if c not in column_class else column_class[c],
-														dict_bd_column_pred[bd][c], bd, dict_bd_column_examples[bd][c]))
+			f_write.write("{}\t{}\t{}\t{}\t{}\n".format(c,"nenhuma" if c not in column_class else column_class[c],dict_bd_column_pred[bd][c],bd,dict_bd_column_examples[bd][c]))
 	f_write.close()
+	"""
 
 	print("Classification report:")
 	print(classification_report(y_true, y_pred))
 
-def test_data(pathname, table, column, filename, threshold):
+def test_data(pathname, dbName, table, columns, filename, threshold):
 	validate = validation.Validation(threshold)
 
-	bd = connectBD.Connection()
-	
-	# dict[database][column] = DataFrame
-	dict_bd_column_df = validate.filterData(bd.getColumnDB(pathname, table, column), verbose=False)
+	connect = connectBD.Connection()
 
-	dict_bd_column_df_pred = dict()
-	for db in dict_bd_column_df:
-		dict_bd_column_df_pred[db] = dict()
+	# dict[table][column] = DataFrame
+	#dict_tab_col_df = validate.filterData(connect.getColumnsDB(pathname, table, columns), verbose=False)
+	dict_tab_col_df = validate.filterData(connect.getColumnsDB2(dbName, table, columns), verbose=False)
+
+	dict_tab_col_df_pred = dict()
+	for tab in dict_tab_col_df:
+		dict_tab_col_df_pred[tab] = dict()
 
 	# Test automatic detection
 	flag_SVM = False
-	for bd,column_df in dict_bd_column_df.items():
-		for c in column_df:
-			pred = validate.checkPattern(column_df[column], column)
+	for tab,col_df in dict_tab_col_df.items():
+		for c in col_df:
+			pred = validate.checkPattern(col_df[c], c)
 			if pred is None:
 				flag_SVM = True
 			else:
-				dict_bd_column_df_pred[db][c] = pred
+				dict_tab_col_df_pred[tab][c] = pred
 
 	# SVM predict: if at least one column needs to be predict
 	if flag_SVM:
@@ -175,16 +177,16 @@ def test_data(pathname, table, column, filename, threshold):
 			print("Please, train the entire data: python3.6 {} --train".format(sys.argv[0]))
 			exit(2)
 
-		vectorizer = getVectorizer(dict_bd_column_df, vocabulary_)
+		vectorizer = getVectorizer(dict_tab_col_df, vocabulary_)
 
-		for bd,column_df in dict_bd_column_df.items():
-			for c in column_df:
-				if c not in dict_bd_column_df_pred[db]:
-					df = pre_processing(column_df[c])
+		for tab,col_df in dict_tab_col_df.items():
+			for c in col_df:
+				if c not in dict_tab_col_df_pred[tab]:
+					df = pre_processing(col_df[c])
 					doc = vectorizer.transform(list(set(df)))
-					dict_bd_column_df_pred[db][c] = np.unique(classifier.predict(doc), return_counts=True)[0][0]
+					dict_tab_col_df_pred[tab][c] = np.unique(classifier.predict(doc), return_counts=True)[0][0]
 
-	return dict_bd_column_df_pred
+	return dict_tab_col_df_pred
 
 # Disable
 def blockPrint():
