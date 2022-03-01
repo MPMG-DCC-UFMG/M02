@@ -1,25 +1,17 @@
-FROM ubuntu:18.04
-ENV DEBIAN_FRONTEND=teletype
+# set base image (host OS)
+FROM python:3.8
 
-COPY . /mpmg
-WORKDIR /mpmg
+# set the working directory in the container
+WORKDIR /code
 
-# Update ubuntu and install python3.6
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends apt-utils && \
-    apt-get -yq install software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get -yq install python3.6 python3.6-dev python3-pip
+# copy the dependencies file to the working directory
+COPY requirements.txt .
 
-RUN ln -sfn /usr/bin/python3.6 /usr/bin/python3 && \
-    ln -sfn /usr/bin/python3 /usr/bin/python && \
-    ln -sfn /usr/bin/pip3 /usr/bin/pip
+# install dependencies
+RUN pip install -r requirements.txt
 
-# To beautifully print utf-8 characters
-ENV PYTHONIOENCODING utf-8
+# copy the content of the local src directory to the working directory
+COPY main.py .
 
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requeriments.txt
-RUN export LANG="C.UTF-8"
-
+# command to run on container start
+CMD [ "python3.8", "./main.py" ]

@@ -2,107 +2,41 @@ import sys
 import os
 import argparse
 import classification
+import segmentacao
 import random
-import json
+#import json
 
 def main():
 
-	#To replicate the experimental results
+	#Para replicar os resultados
 	random.seed(1608637542)
 
-	parser = argparse.ArgumentParser(description='Determining the semantic class of data entries.')
+	parser = argparse.ArgumentParser(description='Segmentação dos Diários Oficiais dos Municípios Mineiros.')
 
-	# test args
-	parser.add_argument("-i", metavar="<input file>",type=str,help="Filename of the trained model. By default, it loads the last model version at the 'model/' directory.", default="")
-	parser.add_argument("--db", metavar="<database>",type=str,help='Name of the database.')
-	parser.add_argument("--table", metavar="<table>",type=str,help='Name of the table.')
-	parser.add_argument("-c", metavar="<column>",type=str,help='Column name.')
-
-	# train args
-	parser.add_argument("--train",help='Train data.', default=False, action='store_true')
-	parser.add_argument("--path", metavar="<pathname>",type=str,help='Path of the entire data (default: ../bds_stage/).', default="../bds_stage/")
-	parser.add_argument("--threshold", metavar="float value",type=float,help='Threshold value of the matching phase (default=0.7).', default=0.7)
-	parser.add_argument("-o", metavar="<output path>",type=str,help="Pathname to write the trained model. By default, it writes at the 'model/' directory.", default="")
-
+	parser.add_argument("-o", metavar="<diretório>",type=str, help="Caminho do diretório par guardar as saídas no formato .json.", default="MPMG_segmentos/")
+	parser.add_argument("--pdf", metavar="<arquivo>",type=str, help="Nome do arquivo do diário oficial em formato PDF.")
+	parser.add_argument("--dir", help="Caminho do diretório contendos os arquivos dos diário oficiais em formato PDF.", default="amostra_AMM/")
+	parser.add_argument("--labels", metavar="<arquivo>", help="Arquivo com as anotações realizadas pelo no serviço web da aplicação (PRISMA).", default="annotation.tsv")
+	parser.add_argument("--json", metavar="<arquivo>", help="Arquivo em JSON contendo os segmentos que foram avaliados pelo no serviço web da aplicação (PRISMA).", default="sample.json")
+	parser.add_argument("--test", help="Avaliação da classificação semântica (validação cruzada).", action='store_true')
+	
 	args = parser.parse_args()
+	dir_output = getattr(args, "o")
+	if dir_output[-1] != "/":
+		dir_output += "/"
 
-	# Prediction case: semantic value for a specific database.column
-	if (getattr(args, "db") is not None) and (getattr(args, "table") is not None):
-		if getattr(args, "c") is None:
-			columns = []
-		else:
-			columns = [getattr(args, "c")]
+	if getattr(args, "pdf") is not None:
+		segmentacao.segementarPDF(getattr(args, "pdf"), dir_output)
 
-		database = getattr(args, "db")
-		table = getattr(args, "table")
+	elif getattr(args, "test"):
+		classification.evaluate(getattr(args, "json"),getattr(args, "labels"))
 
-		filename = getattr(args, "i")
-		if filename is not "":
-			if os.path.exists(filename):
-				try:
-					f = open(filename)
-					f.close()
-				except IOError:
-					print("File '{}' is not accessible. Please check filesystem permissions.".format(filename))
-					exit(2)
-			else:
-				print("File does not exist: '{}'.".format(filename))
-				print("Please, inform the properly pathname of the trained data: {} --table <table> -c <column> -i <inputfile>".format(sys.argv[0]))
-				exit(2)
-		else:
-			path = "model/"
-			try:
-				files = os.listdir(path)
-				paths = [os.path.join(path, basename) for basename in files if basename.endswith(".joblib")]
-			except:
-				print("No such file or directory: 'model/'")
-				print("Please, inform the properly pathname of the trained data: {} --table <table> -c <column> -i <inputfile>".format(sys.argv[0]))
-				exit(2)
-
-			if len(paths) == 0:
-				print("No trained data was found at {}.".format(path))
-				print("Please, train the data first: python3.6 {} --train".format(sys.argv[0]))
-				exit(2)
-			else:
-				filename = max(paths, key=os.path.getctime)
-		threshold = getattr(args, "threshold")
-		pathname = getattr(args, "path")
-		pathname = (pathname if pathname.endswith("/") else pathname + "/")
-
-		result = classification.test_data(pathname, database, table, columns, filename, threshold)
-		print(json.dumps(result, indent = 4))
-		# Trainning case: generate a trained model.
-	elif getattr(args, "train"):
-		pathname = getattr(args, "path")
-		pathname = (pathname if pathname.endswith("/") else pathname + "/")
-		if os.path.isdir(pathname):
-			try:
-				os.listdir(pathname)
-			except:
-				print("Directory '{}' is not accessible. Please check filesystem permissions.".format(pathname))
-				exit(2)
-		else:
-			print("No such directory: '{}'".format(pathname))
-			print("Please, inform the properly path of the data: python3.6 {} --train --path <pathname>".format(sys.argv[0]))
-			exit(2)
-
-		path_out = getattr(args, "o")
-		if path_out is "":
-			path_out = "model/"
-		try:
-			os.listdir(path_out)
-		except:
-			print("Directory '{}' is not accessible. Please check filesystem permissions.".format(path_out))
-			exit(2)
-
-		threshold = getattr(args, "threshold")
-		classification.train_data(pathname, threshold, path_out)
 	else:
-		print("Usage:")
-		print("\t(1) Train the entire data: python3.6 {} --train".format(sys.argv[0]))
-		print("\t(2) Determine the semantic class for all attributes in a database.table: python3.6 {} --db <database> --table <table>".format(sys.argv[0]))
-		print("For more options, type 'python3.6 {} --help'".format(sys.argv[0]))
+		dir_input = getattr(args, "dir")
+		if dir_input[-1] != "/":
+			dir_input += "/"
+		segmentacao.segementarDIR(dir_input, dir_output)
+
 
 if __name__ == "__main__":
     main()
-
