@@ -8,11 +8,11 @@ import sys
 sys.setrecursionlimit(1500)
 
 def segementarPDF(PDF, dir_output):
-	if not os.path.exists(PDF):
-		print("Arquivo não existe: '{}'.".format(PDF))
-		print("Por favor, informar o caminho completo: {} --pdf <arquivo>".format(sys.argv[0]))
-		exit(2)
-	processarPDF(PDF, dir_output)
+    if not os.path.exists(PDF):
+        print("Arquivo não existe: '{}'.".format(PDF))
+        print("Por favor, informar o caminho completo: {} --pdf <arquivo>".format(sys.argv[0]))
+        exit(2)
+    processarPDF(PDF, dir_output)
 
 
 def processarPDF(PDF, dir_output):
@@ -28,12 +28,11 @@ def processarPDF(PDF, dir_output):
     for k,v in metadados.items():
         data[k] = v
 
-    elementos = obterElementosOrdenados(directory + f)
-    segmentos = obterSegmentos(elementos)
-    data["segmentos"] = obterSegmentos(elementos)
+    elementos, cod_page = obterElementosOrdenados(directory + f)
+    #segmentos = obterSegmentos(elementos)
+    data["segmentos"] = obterSegmentos(elementos, cod_page)
 
-    #with open(dir_output + f[:-4] + ".json", 'w') as outfile:
-    with open(dir_output + f[:] + ".json", 'w') as outfile:
+    with open(dir_output + f + ".json", 'w') as outfile:
         json.dump(data, outfile, ensure_ascii=False, indent=4)
     print("Processado - %.2f segundos" % (time.time() - start_time))
 
@@ -53,17 +52,17 @@ def segementarDIR(dir_input, dir_output):
     files = os.listdir(dir_input)
     for f in files:
         if f.endswith(".pdf"):
-            if (not os.path.exists(dir_output + f[:] + ".json")):
+            if (not os.path.exists(dir_output + f + ".json")):
                 print("Processando arquivo '" + f + "'")
                 metadados = obterMetadados(dir_input + "/" + f)
                 data = dict()
                 for k,v in metadados.items():
                     data[k] = v
-                elementos = obterElementosOrdenados(dir_input + "/" + f)
-                segmentos = obterSegmentos(elementos)
-                data["segmentos"] = obterSegmentos(elementos)
+                elementos, cod_page = obterElementosOrdenados(dir_input + "/" + f)
+                #segmentos = obterSegmentos(elementos)
+                data["segmentos"] = obterSegmentos(elementos, cod_page)
 
-                with open(dir_output + f[:] + ".json", 'w') as outfile:
+                with open(dir_output + f + ".json", 'w') as outfile:
                     json.dump(data, outfile, ensure_ascii=False, indent=4)
                 print("Processado - %.2f segundos" % (time.time() - start_time))
             else:
@@ -76,15 +75,14 @@ def obterElementosOrdenados(PDF, log=False):
     # Formato inicial é de duas colunas textuais. Ao final, torna-se de uma coluna.
     n_colunas = 2
     elementos = []
-    
-    #contador = 0
+    cod_page = dict()
     
     temp = extract_pages(PDF, laparams=LAParams(char_margin=4.0))
     
+    page_count = 0;
+    
     for page in temp:#extract_pages(PDF, laparams=LAParams(char_margin=4.0)):
-        #print("#pag", contador)
-        #contador = contador + 1
-        #aka
+        page_count = page_count + 1
         t_elementos = []
         meioDaPagina = page.bbox[2]/2
         alturaDaPagina = page.bbox[3]
@@ -180,8 +178,12 @@ def obterElementosOrdenados(PDF, log=False):
         
         for e in t_elementos:
             elementos.append(e)
+            texto = e.get_text()
+            if "Código Identificador:" in texto:
+                COD_IDENTIFICADOR = (texto[texto.index("Código Identificador:")+len("Código Identificador:"):]).strip()
+                cod_page[COD_IDENTIFICADOR] = page_count
         
-    return elementos
+    return elementos,cod_page
     
 
 
@@ -192,7 +194,7 @@ def obterElementosOrdenados(PDF, log=False):
 from pdfminer.layout import LTTextBoxHorizontal, LTTextLineHorizontal
 import re
 
-def obterSegmentos(elementos):
+def obterSegmentos(elementos, cod_page):
     resto = []
     segmentos = []
     
@@ -239,7 +241,20 @@ def obterSegmentos(elementos):
                     texto = elementos[indice].get_text().strip()
                     MATERIA = ""
                     while (indice+1) < len(elementos) and "Publicado por: " not in texto and "Código Identificador:" not in texto:
-                        MATERIA += texto
+                        #MATERIA += texto #+ "\n"
+                        #here
+                        texto = re.sub(' \n  \n', '$$$', texto.strip()) + "\n"
+                        texto = re.sub('\n', ' ', texto)
+                        texto = re.sub('\$\$\$', '\n', texto)
+#                        if not texto.endswith(". \n"):
+ #                           texto = re.sub('\.\s\n', '. \n', texto.strip())
+                            #texto = texto.strip()
+                        #else:
+                        #    texto = re.sub('\s{2,}', ' ', texto.strip())
+                        
+                        #elif texto.endswith(". \n"):
+                        #    texto = texto.strip()
+                        MATERIA += "\n" + texto + "\n"
                         indice += 1
                         texto = elementos[indice].get_text()
                     #akki
@@ -249,21 +264,28 @@ def obterSegmentos(elementos):
                         #print("---")
                         PUBLICADOR = (texto[len("Publicado por: \n"):texto.index("Código Identificador:")]).strip()
                         COD_IDENTIFICADOR = (texto[texto.index("Código Identificador:")+len("Código Identificador:"):]).strip()
-
-                        MATERIA = re.sub('\s{2,}', ' ', MATERIA.strip())
-
+                        
                         if ENTIDADE not in data:
                             data[ENTIDADE] = []
-
+                            
+                        texto = MATERIA
+                        MATERIA = ""
+                        index_start = 0
+                        for match in re.finditer(r'[a-z][\,\s,\\n]+[\n][a-z]', texto):
+                            MATERIA += texto[index_start:match.start()+1] + " " + texto[match.end()-1]
+                            index_start = match.end()
+                        
+                        MATERIA += texto[index_start:len(texto)]
+                    
                         data[ENTIDADE].append({
-                                #"titulo": TITULO,
-                                #"subtitulo": SUBTITULO,
-                                #"materia": MATERIA,
-                                "materia": TITULO + "\n" + SUBTITULO + "\n" + MATERIA,
-                                "publicador": PUBLICADOR,
-                                "id": COD_IDENTIFICADOR
-                            })
-                
+                        #"titulo": TITULO,
+                        #"subtitulo": SUBTITULO,
+                        #"materia": MATERIA,
+                        "materia": TITULO + "\n" + SUBTITULO + "\n" + MATERIA,
+                        "page": cod_page[COD_IDENTIFICADOR],
+                        "publicador": PUBLICADOR,
+                        "id": COD_IDENTIFICADOR
+                        })
                 # Apontando para o início da próxima matéria
                 while (indice+1) < len(elementos):
                     indice += 1
@@ -360,15 +382,15 @@ def filtrarInformacao(elementos, log=False):
     return descartarSentencas(elementos_filtrados, log)
 
 def obterMetadados(PDF, log=False):
-	ret = dict()
-	ret["origem"]	= PDF
-	ret["diario"]	= ""
-	ret["numero"]	= ""
-	ret["data"]	= ""
+    ret = dict()
+    ret["origem"]   = PDF
+    ret["diario"]   = ""
+    ret["numero"]   = ""
+    ret["data"] = ""
 
-	page = next(extract_pages(PDF, page_numbers=[0], maxpages=1))
-	for elemento in page:
-	    if isinstance(elemento, LTTextBoxHorizontal):
+    page = next(extract_pages(PDF, page_numbers=[0], maxpages=1))
+    for elemento in page:
+        if isinstance(elemento, LTTextBoxHorizontal):
                 texto = elemento.get_text()
                 if re.match("Minas Gerais(.*?)ANO (.*?)\d+", texto):
                     if "Diário Oficial dos Municípios Mineiros" in texto:
@@ -383,5 +405,5 @@ def obterMetadados(PDF, log=False):
                         ret["data"] = match.group()
                     break
 
-	return ret
+    return ret
 
