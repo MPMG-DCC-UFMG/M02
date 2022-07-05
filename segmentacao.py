@@ -32,7 +32,10 @@ def processarPDF(PDF, dir_output):
     segmentos = obterSegmentos(elementos)
     data["segmentos"] = obterSegmentos(elementos)
 
-    with open(dir_output + f[:-4] + ".json", 'w') as outfile:
+    #with open(dir_output + f[:-4] + ".json", 'w') as outfile:
+    print("f4", f[:-4])
+    print("f4", f[:])
+    with open(dir_output + f[:] + ".json", 'w') as outfile:
         json.dump(data, outfile, ensure_ascii=False, indent=4)
     print("Processado - %.2f segundos" % (time.time() - start_time))
 
@@ -52,7 +55,7 @@ def segementarDIR(dir_input, dir_output):
     files = os.listdir(dir_input)
     for f in files:
         if f.endswith(".pdf"):
-            if (not os.path.exists(dir_output + f[:-4] + ".json")):
+            if (not os.path.exists(dir_output + f[:] + ".json")):
                 print("Processando arquivo '" + f + "'")
                 metadados = obterMetadados(dir_input + "/" + f)
                 data = dict()
@@ -62,7 +65,7 @@ def segementarDIR(dir_input, dir_output):
                 segmentos = obterSegmentos(elementos)
                 data["segmentos"] = obterSegmentos(elementos)
 
-                with open(dir_output + f[:-4] + ".json", 'w') as outfile:
+                with open(dir_output + f[:] + ".json", 'w') as outfile:
                     json.dump(data, outfile, ensure_ascii=False, indent=4)
                 print("Processado - %.2f segundos" % (time.time() - start_time))
             else:
