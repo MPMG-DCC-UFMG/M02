@@ -1,7 +1,7 @@
 # M02
 ## Segmentação e Classificação Semântica de Textos
 
-Este repositório é sobre dois aspectos críticos que envolvem documentos governamentais oficiais: segmentação e classificação semântica. O primeiro consiste em separar o texto de um Diário Oficial (DO) em trechos que nos permitam identificar o ente federado associado, o título e o conteúdo dos atos governamentais ali publicados, bem como o(s) responsável(eis) por sua criação. Entretanto, esse não é um problema trivial, visto que cada documento possui uma estrutura de apresentação específica que inclui diferentes componentes gráficos (e.g., separadores visuais). Em relação à classificação semântica do texto extraído, o intuito é prever corretamente a qual classe uma nova observação pertence dado um conjunto pré-determinado de categorias como, por exemplo, se um trecho extraído pertence à classe Leis ou Licitações.
+Este repositório é sobre dois aspectos críticos que envolvem documentos governamentais oficiais: segmentação e classificação semântica. O primeiro consiste em separar o texto de um Diário Oficial (DO) em trechos que nos permitam identificar o ente federado associado, o título e o conteúdo dos atos governamentais ali publicados, bem como o(s) responsável(eis) por sua criação. Contudo, não se trata de um problema trivial, visto que cada documento possui uma estrutura de apresentação específica que inclui diferentes componentes gráficos (e.g., separadores visuais). Em relação à classificação semântica do texto segmentado, o intuito é prever corretamente a qual classe a nova observação pertence. Por exemplo, dado um conjunto pré-determinado de categorias tais como, "Leis", "Licitações", "Portarias", "Pessoal", a qual dessas classes um trecho extraído pertence.
 
 ## Instalação
 
