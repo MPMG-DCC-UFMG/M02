@@ -1,0 +1,6 @@
+scipy==1.7.1
+nltk==3.6.2
+numpy==1.21.1
+pdfminer.six==20211012
+pdfminer==20191125
+scikit_learn==1.0.2
