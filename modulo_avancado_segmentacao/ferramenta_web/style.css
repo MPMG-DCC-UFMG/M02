@@ -1,0 +1,56 @@
+body {
+    margin: 0;
+  }
+  
+  .content{
+    display: flex;
+    justify-content: center;
+    align-items:center;
+  }
+  .interfaces{
+    display:flex;
+    flex-direction:column;
+    margin-top:30px;
+    margin-right:15px;
+    height:600px;
+     width: 20%;
+  }
+  
+  .menu{
+    height:47%;
+    border:4px solid #595959;
+    margin-bottom:15px;
+  }
+  
+  .result{
+    height: 53%;
+    border:4px solid #595959;
+  }
+  .lastSelectedDiv{
+    display:flex;
+    justify-content:center;
+  }
+  .lastSelected{
+    width: 80%;
+    border:4px solid #595959;
+  }
+  
+  #diario{
+    margin-top:30px;
+    height:600px;
+    border:4px solid #595959;
+    position: relative;
+    overflow: auto;
+  }
+  
+  #pdfCanvas {
+    z-index: 1;
+    position: absolute;
+    
+  }
+  
+  #drawingCanvas {
+    z-index: 2;
+    position: absolute;
+  }
+  

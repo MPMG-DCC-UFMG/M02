@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
+    <script src="selections.js" defer></script>
+  </head>
+  <body>
+    <div class="content">
+      <div class="interfaces">
+        <div class="menu">
+          <h1>Selecione o conteúdo dos segmentos</h1>
+          <input
+            type="radio"
+            id="include"
+            class="type_selection"
+            name="select_type"
+            value="include"
+            checked
+          />
+          <label for="include">Relevantes</label><br />
+          <input
+            type="radio"
+            id="exclude"
+            class="type_selection"
+            name="select_type"
+            value="exclude"
+          />
+          <label for="exclude">Não Relevantes</label><br />
+          <input
+            type="radio"
+            id="unselect"
+            class="type_selection"
+            name="select_type"
+            value="unselect"
+          />
+          <label for="unselect">Desselecionar</label>
+          <div>
+            <button onClick="previousPage()">Anterior</button>
+            <button onClick="nextPage()">Próxima</button>
+          </div>
+          <button onClick="printResult()">Resultado</button>
+        </div>
+        <div class="result" id="result"></div>
+      </div>
+      <div id="diario">
+        <canvas id="pdfCanvas"></canvas>
+        <canvas id="drawingCanvas"></canvas>
+      </div>
+    </div>
+    <div class="lastSelectedDiv">
+      <div class="lastSelected" id="lastSelected"></div>
+    </div>
+  </body>
+</html>
