@@ -1,55 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
   <head>
+    <!-- Meta tags Obrigatórias -->
+    <meta charset="utf-8">
+    <!--meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"-->
+
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.16.105/build/pdf.min.js"></script>
     <script src="selections.js" defer></script>
+
+    <title>Segmentador de Diário Oficial (SegDO)</title>
   </head>
   <body>
-    <div class="content">
-      <div class="interfaces">
-        <div class="menu">
-          <h1>Selecione o conteúdo dos segmentos</h1>
-          <input
-            type="radio"
-            id="include"
-            class="type_selection"
-            name="select_type"
-            value="include"
-            checked
-          />
-          <label for="include">Relevantes</label><br />
-          <input
-            type="radio"
-            id="exclude"
-            class="type_selection"
-            name="select_type"
-            value="exclude"
-          />
-          <label for="exclude">Não Relevantes</label><br />
-          <input
-            type="radio"
-            id="unselect"
-            class="type_selection"
-            name="select_type"
-            value="unselect"
-          />
-          <label for="unselect">Desselecionar</label>
-          <div>
-            <button onClick="previousPage()">Anterior</button>
-            <button onClick="nextPage()">Próxima</button>
-          </div>
-          <button onClick="printResult()">Resultado</button>
+    <div class="container-fluid">
+    <!--div class="content"-->
+
+      <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand">SegDO</a>
+          <form class="d-flex">
+            <input class="form-control me-2" type="search" placeholder="Selecione um Diário Oficial (PDF)" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form>
         </div>
-        <div class="result" id="result"></div>
+      </nav>
+
+      <div class="row justify-content-md-center">
+        <div class="col-8" style="height:36rem;">
+          <div id="diario">
+            <canvas id="pdfCanvas"></canvas>
+            <canvas id="drawingCanvas"></canvas>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="row">
+            <h5>Informações gerais do Diário Oficial</h5><br/>
+            <h6>Nome do arquivo</h6><br/>
+            <h6>Número do Diário Oficial</h6><br/>
+            <h6>Data</h6><br/>
+          </div>
+          <div class="row">
+
+
+          </div>
+          <div class="row">
+            <div class="menu">
+              <h5>Selecione o conteúdo dos segmentos</h5>
+              <input
+                type="radio"
+                id="include"
+                class="type_selection"
+                name="select_type"
+                value="include"
+                checked
+              />
+              <label for="include">Relevantes</label><br/>
+              <input
+                type="radio"
+                id="exclude"
+                class="type_selection"
+                name="select_type"
+                value="exclude"
+              />
+              <label for="exclude">Não Relevantes</label><br/>
+              <input
+                type="radio"
+                id="unselect"
+                class="type_selection"
+                name="select_type"
+                value="unselect"
+              />
+              <label for="unselect">Desselecionar</label>
+            </div>
+            <div class="result" id="result"></div>
+          </div>
+          <div class="row">
+            <div class="lastSelectedDiv">
+              <div class="lastSelected" id="lastSelected"></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div id="diario">
-        <canvas id="pdfCanvas"></canvas>
-        <canvas id="drawingCanvas"></canvas>
-      </div>
+      <footer class="footer mt-auto py-3 bg-light">
+        <div class="row justify-content-md-center">
+          <div class="col-3"></div>
+          <div class="col-3">
+            <button type="button" class="btn btn-outline-success" onClick="previousPage()">Página anterior</button>
+            <button type="button" class="btn btn-outline-success" onClick="nextPage()">Próxima página</button>
+          </div>
+          <div class="col-3"></div>
+          <div class="col-3">
+            <button type="button" class="btn btn-outline-success" onClick="printResult()">Segmentar</button>
+            <button type="button" class="btn btn-outline-success" onClick="printResult()">Classificar</button>
+          </div>
+        </div>
+      </footer>
     </div>
-    <div class="lastSelectedDiv">
-      <div class="lastSelected" id="lastSelected"></div>
-    </div>
+
+    
+    <!-- JavaScript (Opcional) -->
+    <!-- jQuery primeiro, depois Popper.js, depois Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
   </body>
 </html>

@@ -14,6 +14,7 @@ function fixPositions() {
   }
 }
 
+
 /*
  * Checa se o ponto se encontra dentro do retângulo definido pelas coordenadas
  * dadas dada uma tolerância.
@@ -134,7 +135,7 @@ function renderContent(curPage) {
     drawingCanvas.width = viewWidth;
     drawingCanvas.height = viewHeight;
 
-    doc.style.width = `${viewWidth + 20}px`;
+    doc.style.width = `${viewWidth + 10}px`;
 
     page.render({
       canvasContext: pdfContext,
